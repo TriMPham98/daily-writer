@@ -6,15 +6,13 @@
 }
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --card-background: #171717;
+  --border-color: #333333;
+  --primary: #3b82f6;
+  --primary-foreground: #ffffff;
+  --muted: #737373;
 }
 
 body {

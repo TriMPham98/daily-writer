@@ -30,15 +30,15 @@ const ContributionGraph: React.FC = () => {
       isSameDay(new Date(c.date), date)
     );
 
-    if (!contribution) return "bg-gray-100";
+    if (!contribution) return "bg-gray-800";
 
     const wordCount = contribution.wordCount;
 
-    if (wordCount === 0) return "bg-gray-100";
-    if (wordCount < 100) return "bg-green-100";
-    if (wordCount < 300) return "bg-green-300";
-    if (wordCount < 500) return "bg-green-500";
-    return "bg-green-700";
+    if (wordCount === 0) return "bg-gray-800";
+    if (wordCount < 100) return "bg-blue-900";
+    if (wordCount < 300) return "bg-blue-700";
+    if (wordCount < 500) return "bg-blue-500";
+    return "bg-blue-400";
   };
 
   // Navigate to previous month
@@ -69,7 +69,7 @@ const ContributionGraph: React.FC = () => {
         <div className="flex items-center space-x-4">
           <button
             onClick={goToPreviousMonth}
-            className="p-2 rounded-md hover:bg-gray-100">
+            className="p-2 rounded-md hover:bg-card-background text-foreground">
             ←
           </button>
           <span className="font-medium">
@@ -77,7 +77,7 @@ const ContributionGraph: React.FC = () => {
           </span>
           <button
             onClick={goToNextMonth}
-            className="p-2 rounded-md hover:bg-gray-100">
+            className="p-2 rounded-md hover:bg-card-background text-foreground">
             →
           </button>
         </div>
@@ -85,7 +85,7 @@ const ContributionGraph: React.FC = () => {
 
       <div className="grid grid-cols-7 gap-2">
         {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
-          <div key={day} className="text-center text-xs text-gray-500">
+          <div key={day} className="text-center text-xs text-muted">
             {day}
           </div>
         ))}
@@ -111,14 +111,14 @@ const ContributionGraph: React.FC = () => {
         })}
       </div>
 
-      <div className="mt-4 flex items-center justify-end text-xs text-gray-500">
+      <div className="mt-4 flex items-center justify-end text-xs text-muted">
         <span className="mr-2">Less</span>
         <div className="flex space-x-1">
-          <div className="w-3 h-3 bg-gray-100 rounded-sm"></div>
-          <div className="w-3 h-3 bg-green-100 rounded-sm"></div>
-          <div className="w-3 h-3 bg-green-300 rounded-sm"></div>
-          <div className="w-3 h-3 bg-green-500 rounded-sm"></div>
-          <div className="w-3 h-3 bg-green-700 rounded-sm"></div>
+          <div className="w-3 h-3 bg-gray-800 rounded-sm"></div>
+          <div className="w-3 h-3 bg-blue-900 rounded-sm"></div>
+          <div className="w-3 h-3 bg-blue-700 rounded-sm"></div>
+          <div className="w-3 h-3 bg-blue-500 rounded-sm"></div>
+          <div className="w-3 h-3 bg-blue-400 rounded-sm"></div>
         </div>
         <span className="ml-2">More</span>
       </div>

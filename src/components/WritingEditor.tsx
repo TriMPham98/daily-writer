@@ -131,11 +131,11 @@ const WritingEditor: React.FC<WritingEditorProps> = ({
         <div>
           <h2 className="text-xl font-bold">Daily Writing</h2>
           {currentEntry && (
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted">
               Word Count: {currentEntry.wordCount} /{" "}
               {currentEntry.targetWordCount}
               {currentEntry.isCompleted && (
-                <span className="ml-2 text-green-600">✓ Completed</span>
+                <span className="ml-2 text-primary">✓ Completed</span>
               )}
             </p>
           )}
@@ -149,12 +149,12 @@ const WritingEditor: React.FC<WritingEditorProps> = ({
         onKeyDown={handleKeyDown}
         onPaste={handlePaste}
         disabled={!isEditable}
-        className="w-full h-96 p-4 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+        className="w-full h-96 p-4 border border-border-color rounded-md bg-card-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
         placeholder="Start writing here... You won't be able to delete text until you reach your word count goal."
       />
 
       {!isEditable && (
-        <div className="mt-4 p-3 bg-green-100 text-green-800 rounded-md">
+        <div className="mt-4 p-3 bg-primary bg-opacity-10 text-primary rounded-md">
           <p>
             Congratulations! You've reached your word count goal. Your entry is
             now locked.
