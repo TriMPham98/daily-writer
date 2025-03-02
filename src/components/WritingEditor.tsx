@@ -150,14 +150,14 @@ const WritingEditor: React.FC<WritingEditorProps> = ({
         onPaste={handlePaste}
         disabled={!isEditable}
         className="w-full h-96 p-4 border border-border-color rounded-md bg-card-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
-        placeholder="Start writing here... You won't be able to delete text until you reach your word count goal."
+        placeholder="Start writing here... You need to write at least 100 words. You won't be able to delete text until you reach your word count goal."
       />
 
       {!isEditable && (
         <div className="mt-4 p-3 bg-primary bg-opacity-10 text-primary rounded-md">
           <p>
-            Congratulations! You've reached your word count goal. Your entry is
-            now locked.
+            Congratulations! You've reached your word count goal of 100 words.
+            Your entry is now locked.
           </p>
         </div>
       )}
