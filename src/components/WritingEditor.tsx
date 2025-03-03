@@ -125,6 +125,13 @@ const WritingEditor: React.FC<WritingEditorProps> = ({
     }
   };
 
+  // Handle starting a new session
+  const handleStartNewSession = () => {
+    setContent("");
+    setIsEditable(true);
+    createEntry(targetWordCount);
+  };
+
   return (
     <div className="w-full max-w-4xl mx-auto p-4">
       <div className="mb-4 flex justify-between items-center">
@@ -156,9 +163,14 @@ const WritingEditor: React.FC<WritingEditorProps> = ({
       {!isEditable && (
         <div className="mt-4 p-3 bg-primary bg-opacity-10 text-primary rounded-md">
           <p>
-            Congratulations! You've reached your word count goal of 100 words.
-            Your entry is now locked.
+            Congratulations! You've reached your word count goal of{" "}
+            {targetWordCount} words. Your entry is now locked.
           </p>
+          <button
+            onClick={handleStartNewSession}
+            className="mt-2 px-4 py-2 bg-primary text-white rounded-md hover:bg-opacity-90 transition-colors">
+            Start New Session
+          </button>
         </div>
       )}
     </div>
