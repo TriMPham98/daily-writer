@@ -16,9 +16,10 @@ interface WritingStore {
   getEntryById: (id: string) => WritingEntry | undefined;
   getEntriesByDate: (date: string) => WritingEntry[];
   getContributionsByMonth: (month: number, year: number) => DailyContribution[];
+  fetchEntries: () => Promise<void>;
 }
 
-const DEFAULT_TARGET_WORD_COUNT = 500;
+const DEFAULT_TARGET_WORD_COUNT = 50;
 
 const calculateWordCount = (text: string): number => {
   if (!text) return 0;
@@ -37,7 +38,7 @@ const useWritingStore = create<WritingStore>()(
         contributions: [],
       },
 
-      createEntry: (targetWordCount = DEFAULT_TARGET_WORD_COUNT) => {
+      createEntry: async (targetWordCount = DEFAULT_TARGET_WORD_COUNT) => {
         const today = new Date();
         const todayStr = format(today, "yyyy-MM-dd");
 
@@ -51,104 +52,106 @@ const useWritingStore = create<WritingStore>()(
           lastModified: new Date().toISOString(),
         };
 
-        set((state) => ({
-          entries: [...state.entries, newEntry],
-          currentEntry: newEntry,
-          stats: {
-            ...state.stats,
-            totalEntries: state.stats.totalEntries + 1,
-          },
-        }));
-      },
-
-      updateEntry: (content: string) => {
-        const { currentEntry } = get();
-        if (!currentEntry) return;
-
-        const wordCount = calculateWordCount(content);
-
-        set((state) => {
-          // Find the entry in the entries array
-          const updatedEntries = state.entries.map((entry) => {
-            if (entry.id === currentEntry.id) {
-              return {
-                ...entry,
-                content,
-                wordCount,
-                lastModified: new Date().toISOString(),
-              };
-            }
-            return entry;
+        try {
+          const response = await fetch("/api/entries", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(newEntry),
           });
 
-          // Update the current entry
-          const updatedCurrentEntry = {
-            ...currentEntry,
-            content,
-            wordCount,
-            lastModified: new Date().toISOString(),
-          };
-
-          // Calculate the word count difference for stats
-          const wordCountDiff = wordCount - currentEntry.wordCount;
-
-          // Update contributions for today
-          const today = format(new Date(), "yyyy-MM-dd");
-          let contributions = [...state.stats.contributions];
-          const todayContributionIndex = contributions.findIndex(
-            (c) => c.date === today
-          );
-
-          if (todayContributionIndex >= 0) {
-            contributions[todayContributionIndex] = {
-              ...contributions[todayContributionIndex],
-              wordCount:
-                contributions[todayContributionIndex].wordCount + wordCountDiff,
-            };
-          } else {
-            contributions.push({
-              date: today,
-              wordCount,
-            });
+          if (!response.ok) {
+            throw new Error("Failed to create entry");
           }
 
-          return {
-            entries: updatedEntries,
-            currentEntry: updatedCurrentEntry,
+          const savedEntry = await response.json();
+
+          set((state) => ({
+            entries: [...state.entries, savedEntry],
+            currentEntry: savedEntry,
             stats: {
               ...state.stats,
-              totalWordCount: state.stats.totalWordCount + wordCountDiff,
-              contributions,
+              totalEntries: state.stats.totalEntries + 1,
             },
-          };
-        });
+          }));
+        } catch (error) {
+          console.error("Failed to create entry:", error);
+        }
       },
 
-      completeEntry: () => {
+      updateEntry: async (content: string) => {
         const { currentEntry } = get();
         if (!currentEntry) return;
 
-        set((state) => {
-          const updatedEntries = state.entries.map((entry) => {
-            if (entry.id === currentEntry.id) {
-              return {
-                ...entry,
-                isCompleted: true,
-                lastModified: new Date().toISOString(),
-              };
-            }
-            return entry;
+        const wordCount = content.trim().split(/\s+/).filter(Boolean).length;
+        const updatedEntry = {
+          ...currentEntry,
+          content,
+          wordCount,
+          lastModified: new Date().toISOString(),
+        };
+
+        try {
+          const response = await fetch(`/api/entries/${currentEntry.id}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(updatedEntry),
           });
 
-          return {
-            entries: updatedEntries,
-            currentEntry: {
-              ...currentEntry,
-              isCompleted: true,
-              lastModified: new Date().toISOString(),
+          if (!response.ok) {
+            throw new Error("Failed to update entry");
+          }
+
+          const savedEntry = await response.json();
+
+          set((state) => ({
+            entries: state.entries.map((entry) =>
+              entry.id === currentEntry.id ? savedEntry : entry
+            ),
+            currentEntry: savedEntry,
+          }));
+        } catch (error) {
+          console.error("Failed to update entry:", error);
+        }
+      },
+
+      completeEntry: async () => {
+        const { currentEntry } = get();
+        if (!currentEntry) return;
+
+        const updatedEntry = {
+          ...currentEntry,
+          isCompleted: true,
+          lastModified: new Date().toISOString(),
+        };
+
+        try {
+          const response = await fetch(`/api/entries/${currentEntry.id}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
             },
-          };
-        });
+            body: JSON.stringify(updatedEntry),
+          });
+
+          if (!response.ok) {
+            throw new Error("Failed to complete entry");
+          }
+
+          const savedEntry = await response.json();
+
+          set((state) => ({
+            entries: state.entries.map((entry) =>
+              entry.id === currentEntry.id ? savedEntry : entry
+            ),
+            currentEntry: savedEntry,
+          }));
+        } catch (error) {
+          console.error("Failed to complete entry:", error);
+        }
       },
 
       getEntryById: (id: string) => {
@@ -168,6 +171,32 @@ const useWritingStore = create<WritingStore>()(
             contributionDate.getFullYear() === year
           );
         });
+      },
+
+      fetchEntries: async () => {
+        try {
+          const response = await fetch("/api/entries");
+          if (!response.ok) {
+            throw new Error("Failed to fetch entries");
+          }
+
+          const entries = await response.json();
+          const totalWordCount = entries.reduce(
+            (sum: number, entry: WritingEntry) => sum + entry.wordCount,
+            0
+          );
+
+          set((state) => ({
+            entries,
+            stats: {
+              ...state.stats,
+              totalWordCount,
+              totalEntries: entries.length,
+            },
+          }));
+        } catch (error) {
+          console.error("Failed to fetch entries:", error);
+        }
       },
     }),
     {
