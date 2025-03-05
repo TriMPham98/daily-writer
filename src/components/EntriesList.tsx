@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect } from "react";
 import useWritingStore from "@/store/useWritingStore";
 import { format } from "date-fns";
